@@ -1,0 +1,21 @@
+name: HelloWorld
+options:
+  bundleIdPrefix: com.example
+settings:
+  CODE_SIGN_IDENTITY: ""
+  CODE_SIGNING_REQUIRED: NO
+  CODE_SIGNING_ALLOWED: NO
+targets:
+  HelloWorld:
+    type: application
+    platform: iOS
+    deploymentTarget: "16.7"
+    sources:
+      - Sources
+    settings:
+      PRODUCT_BUNDLE_IDENTIFIER: com.example.helloworld
+      INFOPLIST_FILE: Info.plist
+      CODE_SIGN_IDENTITY: ""
+      CODE_SIGNING_REQUIRED: NO
+      CODE_SIGNING_ALLOWED: NO
+      SWIFT_VERSION: "5.0"
