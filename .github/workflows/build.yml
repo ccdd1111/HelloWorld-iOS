@@ -8,17 +8,50 @@ jobs:
     runs-on: macos-latest
     
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
       
-    - name: Install xcodegen
-      run: brew install xcodegen
+    - run: mkdir -p Sources
       
-    - name: Generate Xcode Project
-      run: xcodegen generate
+    - run: |
+        echo 'import SwiftUI' > Sources/main.swift
+        echo '' >> Sources/main.swift
+        echo '@main' >> Sources/main.swift
+        echo 'struct HelloWorldApp: App {' >> Sources/main.swift
+        echo '    var body: some Scene {' >> Sources/main.swift
+        echo '        WindowGroup {' >> Sources/main.swift
+        echo '            Text("Hello World")' >> Sources/main.swift
+        echo '                .font(.largeTitle)' >> Sources/main.swift
+        echo '                .foregroundColor(.blue)' >> Sources/main.swift
+        echo '                .padding()' >> Sources/main.swift
+        echo '        }' >> Sources/main.swift
+        echo '    }' >> Sources/main.swift
+        echo '}' >> Sources/main.swift
       
-    - name: Build Unsigned App
-      run: |
+    - run: |
+        echo 'name: HelloWorld' > project.yml
+        echo 'options:' >> project.yml
+        echo '  bundleIdPrefix: com.example' >> project.yml
+        echo '  deploymentTarget:' >> project.yml
+        echo '    iOS: "16.7"' >> project.yml
+        echo 'targets:' >> project.yml
+        echo '  HelloWorld:' >> project.yml
+        echo '    type: application' >> project.yml
+        echo '    platform: iOS' >> project.yml
+        echo '    sources:' >> project.yml
+        echo '      - Sources' >> project.yml
+        echo '    settings:' >> project.yml
+        echo '      PRODUCT_BUNDLE_IDENTIFIER: com.example.helloworld' >> project.yml
+        echo '      CODE_SIGN_IDENTITY: ""' >> project.yml
+        echo '      CODE_SIGNING_REQUIRED: NO' >> project.yml
+        echo '      CODE_SIGNING_ALLOWED: NO' >> project.yml
+        echo '      SWIFT_VERSION: "5.0"' >> project.yml
+        echo '      GENERATE_INFOPLIST_FILE: YES' >> project.yml
+      
+    - run: brew install xcodegen
+      
+    - run: xcodegen generate
+      
+    - run: |
         xcodebuild -project HelloWorld.xcodeproj \
                    -scheme HelloWorld \
                    -sdk iphoneos \
@@ -29,15 +62,13 @@ jobs:
                    CODE_SIGNING_ALLOWED=NO \
                    build
                    
-    - name: Package IPA
-      run: |
+    - run: |
         mkdir -p Payload
         cp -R derived/Build/Products/Release-iphoneos/HelloWorld.app Payload/
         zip -r HelloWorld_Unsigned.ipa Payload
         rm -rf Payload
         
-    - name: Upload IPA
-      uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v4
       with:
         name: HelloWorld-IPA
         path: HelloWorld_Unsigned.ipa
